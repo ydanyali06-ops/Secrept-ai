@@ -1,0 +1,4 @@
+gemini_ai/
+├── main.py
+├── data.json
+└── requirements.txt
