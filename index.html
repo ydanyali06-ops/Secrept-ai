@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>چت با AI</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+    }
+
+    .chat {
+      max-width: 700px;
+      margin: auto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2 {
+      text-align: center;
+      padding: 15px;
+      margin: 0;
+      border-bottom: 1px solid #333;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+    }
+
+    .message {
+      padding: 10px 14px;
+      margin: 8px 0;
+      border-radius: 12px;
+      max-width: 80%;
+    }
+
+    .user {
+      background: #333;
+      margin-right: auto;
+    }
+
+    .ai {
+      background: #222;
+      margin-left: auto;
+    }
+
+    .input-box {
+      display: flex;
+      padding: 10px;
+      gap: 8px;
+      border-top: 1px solid #333;
+    }
+
+    input {
+      flex: 1;
+      padding: 13px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 13px 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="chat">
+  <h2>🤖 چت با AI</h2>
+
+  <div id="messages">
+    <div class="message ai">سلام! چطور می‌تونم کمکت کنم؟</div>
+  </div>
+
+  <div class="input-box">
+    <input id="messageInput" placeholder="پیامت را بنویس...">
+    <button onclick="sendMessage()">ارسال</button>
+  </div>
+</div>
+
+<script>
+function sendMessage() {
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  const messages = document.getElementById("messages");
+
+  messages.innerHTML += `
+    <div class="message user">${text}</div>
+  `;
+
+  input.value = "";
+
+  // فعلاً فقط برای تست صفحه
+  messages.innerHTML += `
+    <div class="message ai">پیامت دریافت شد 🤖</div>
+  `;
+
+  messages.scrollTop = messages.scrollHeight;
+}
+</script>
+
+</body>
+</html>
