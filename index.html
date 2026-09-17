@@ -9,128 +9,124 @@
 *{box-sizing:border-box}
 
 body{
- margin:0;
- background:#08080c;
- color:#fff;
- font-family:Arial,sans-serif
+margin:0;
+background:#050509;
+color:white;
+font-family:Arial,sans-serif
 }
 
 .app{
- max-width:850px;
- height:100vh;
- margin:auto;
- display:flex;
- flex-direction:column;
- background:#111118
+max-width:900px;
+height:100vh;
+margin:auto;
+display:flex;
+flex-direction:column;
+background:#0d0d14
 }
 
 header{
- padding:16px;
- background:#171720;
- border-bottom:1px solid #292936;
- display:flex;
- align-items:center;
- gap:12px
+padding:14px;
+display:flex;
+align-items:center;
+gap:12px;
+background:linear-gradient(135deg,#17172b,#101018);
+border-bottom:1px solid #29293a
 }
 
 .logo{
- width:48px;
- height:48px;
- border-radius:50%;
- object-fit:cover;
- background:#222
+width:52px;
+height:52px;
+border-radius:50%;
+object-fit:cover;
+background:#222
 }
 
-h1{
- margin:0;
- font-size:21px
+.title{
+font-size:21px;
+font-weight:bold
 }
 
 .status{
- color:#4ade80;
- font-size:12px;
- margin-top:4px
+color:#4ade80;
+font-size:12px;
+margin-top:4px
 }
 
 #chat{
- flex:1;
- overflow-y:auto;
- padding:15px
+flex:1;
+overflow-y:auto;
+padding:15px
 }
 
 .msg{
- max-width:85%;
- padding:11px 14px;
- margin:8px 0;
- border-radius:15px;
- line-height:1.7;
- white-space:pre-wrap
+max-width:88%;
+padding:12px 15px;
+margin:9px 0;
+border-radius:17px;
+line-height:1.8;
+white-space:pre-wrap;
+word-break:break-word
 }
 
 .user{
- margin-right:auto;
- background:#27273a
+margin-right:auto;
+background:#27273a
 }
 
 .ai{
- margin-left:auto;
- background:#1b1b25;
- border:1px solid #30303d
-}
-
-.chat-img{
- max-width:280px;
- max-height:280px;
- border-radius:14px
+margin-left:auto;
+background:#171722;
+border:1px solid #303044
 }
 
 .tools{
- display:flex;
- gap:7px;
- overflow-x:auto;
- padding:8px;
- background:#171720
+display:flex;
+gap:7px;
+overflow-x:auto;
+padding:8px;
+background:#11111a
 }
 
 button{
- border:0;
- border-radius:11px;
- padding:11px 14px;
- color:white;
- background:#30303f;
- cursor:pointer;
- white-space:nowrap
+border:0;
+border-radius:12px;
+padding:11px 14px;
+color:white;
+background:#292939;
+cursor:pointer;
+white-space:nowrap
 }
 
-button:hover{
- background:#424255
-}
+.blue{background:#2563eb}
+.red{background:#dc2626}
 
-.send{
- background:#2563eb
-}
-
-.input{
- display:flex;
- gap:8px;
- padding:10px;
- background:#171720
+.inputBox{
+display:flex;
+gap:8px;
+padding:10px;
+background:#11111a
 }
 
 #input{
- flex:1;
- min-width:0;
- padding:13px;
- border:0;
- outline:0;
- border-radius:12px;
- background:#262631;
- color:white;
- font-size:15px
+flex:1;
+min-width:0;
+padding:14px;
+border:1px solid #303040;
+outline:none;
+border-radius:14px;
+background:#20202c;
+color:white;
+font-size:15px
 }
 
 #file{
- display:none
+display:none
+}
+
+.image{
+max-width:280px;
+max-height:280px;
+border-radius:15px
 }
 </style>
 </head>
@@ -140,528 +136,636 @@ button:hover{
 <div class="app">
 
 <header>
-<img id="logo" class="logo" src="images/ai.png"
-     onerror="this.style.display='none'">
+
+<img
+class="logo"
+src="ai.png"
+onerror="this.style.display='none'"
+>
 
 <div>
-<h1>🤖 My AI</h1>
-<div class="status">● آماده</div>
+<div class="title">🤖 My AI</div>
+<div class="status" id="status">
+● در حال بارگذاری مغز...
 </div>
+</div>
+
 </header>
 
 <div id="chat"></div>
 
 <div class="tools">
+
+<button onclick="startMic()">🎤 میکروفن</button>
+
+<button onclick="speakLast()">🔊 صدا</button>
+
 <button onclick="pickImage()">🖼️ عکس</button>
+
 <button onclick="showMemory()">🧠 حافظه</button>
+
 <button onclick="showHelp()">❓ راهنما</button>
-<button onclick="clearLearned()">🗑️ پاک کردن یادگیری</button>
+
+<button class="red" onclick="clearChat()">🗑️ پاک کردن</button>
+
 </div>
 
-<input id="file" type="file" accept="image/*">
+<input
+id="file"
+type="file"
+accept="image/*"
+>
 
-<div class="input">
-<input id="input"
-       placeholder="پیامت را بنویس..."
-       autocomplete="off">
+<div class="inputBox">
 
-<button class="send" onclick="send()">ارسال</button>
+<input
+id="input"
+placeholder="پیامت را بنویس..."
+autocomplete="off"
+>
+
+<button
+class="blue"
+onclick="send()"
+>
+ارسال
+</button>
+
 </div>
 
 </div>
 
 <script>
 
-/* =====================================
-   🧠 تنظیمات
-===================================== */
+/* =========================
+   🧠 مغز اصلی
+========================= */
 
-const DATA_URL = "data.json";
+let brain={};
 
-let brain = {};
-let learned = {};
+let learned=
+JSON.parse(
+localStorage.getItem("MY_AI_MEMORY") || "{}"
+);
+
+let history=
+JSON.parse(
+localStorage.getItem("MY_AI_CHAT") || "[]"
+);
+
+let lastAnswer="";
 
 
-/* =====================================
-   🧹 تمیز کردن متن
-===================================== */
+/* =========================
+   تمیز کردن متن
+========================= */
 
 function clean(text){
 
-    return String(text)
-        .trim()
-        .toLowerCase()
-        .replace(/[؟?!،,.؛:]/g,"")
-        .replace(/\s+/g," ");
+return String(text)
+.toLowerCase()
+.trim()
+.replace(/[؟?!،,.؛:]/g,"")
+.replace(/\s+/g," ");
 
 }
 
 
-/* =====================================
-   💾 حافظه یادگیری کاربر
-===================================== */
-
-function loadLearned(){
-
-    try{
-
-        learned =
-            JSON.parse(
-                localStorage.getItem("MY_AI_LEARNED") || "{}"
-            );
-
-    }catch{
-
-        learned = {};
-
-    }
-
-}
-
-
-function saveLearned(){
-
-    localStorage.setItem(
-        "MY_AI_LEARNED",
-        JSON.stringify(learned)
-    );
-
-}
-
-
-/* =====================================
-   📚 بارگذاری data.json
-===================================== */
+/* =========================
+   📚 بارگذاری مغز
+========================= */
 
 async function loadBrain(){
 
-    try{
+try{
 
-        const response =
-            await fetch(DATA_URL);
+const response=
+await fetch("data.json");
 
-        if(!response.ok)
-            throw new Error("data.json not found");
+if(!response.ok)
+throw new Error();
 
-        const data =
-            await response.json();
+brain=
+await response.json();
 
-        brain = data;
+document.getElementById("status").textContent=
+"● آماده | "+
+Object.keys(brain).length+
+" اطلاعات";
 
-        addAI(
-            "🧠 مغز اطلاعاتی من آماده شد!\n" +
-            Object.keys(brain).length.toLocaleString() +
-            " ورودی در data.json پیدا شد."
-        );
+addMessage(
+"🧠 مغز من آماده شد!\n"+
+Object.keys(brain).length+
+" اطلاعات از data.json بارگذاری شد.",
+"ai"
+);
 
-    }catch(error){
+}catch(error){
 
-        brain = {};
+document.getElementById("status").textContent=
+"● خطا در مغز";
 
-        addAI(
-            "⚠️ فایل data.json پیدا نشد.\n" +
-            "اگر آن را در کنار index.html گذاشتی، صفحه را Refresh کن."
-        );
+addMessage(
+"⚠️ فایل data.json پیدا نشد یا JSON آن اشتباه است.",
+"ai"
+);
 
-    }
+}
 
 }
 
 
-/* =====================================
+/* =========================
    💬 پیام
-===================================== */
+========================= */
 
-function addUser(text){
+function addMessage(text,type){
 
-    const div =
-        document.createElement("div");
+const div=
+document.createElement("div");
 
-    div.className = "msg user";
-    div.textContent = text;
+div.className="msg "+type;
 
-    document
-        .getElementById("chat")
-        .appendChild(div);
+div.textContent=text;
 
-    scrollChat();
+document
+.getElementById("chat")
+.appendChild(div);
 
-}
+scrollChat();
 
-
-function addAI(text){
-
-    const div =
-        document.createElement("div");
-
-    div.className = "msg ai";
-    div.textContent = text;
-
-    document
-        .getElementById("chat")
-        .appendChild(div);
-
-    scrollChat();
+return div;
 
 }
 
 
 function scrollChat(){
 
-    const chat =
-        document.getElementById("chat");
+const chat=
+document.getElementById("chat");
 
-    chat.scrollTop =
-        chat.scrollHeight;
+chat.scrollTop=
+chat.scrollHeight;
 
 }
 
 
-/* =====================================
-   🧠 یادگیری
-===================================== */
+/* =========================
+   💾 ذخیره چت
+========================= */
+
+function saveChat(){
+
+localStorage.setItem(
+"MY_AI_CHAT",
+JSON.stringify(history)
+);
+
+}
+
+
+/* =========================
+   🧠 آموزش
+========================= */
 
 function teach(text){
 
-    const data =
-        text.substring(9).trim();
+let data=
+text.substring(9).trim();
 
-    const parts =
-        data.split("|");
+let parts=
+data.split("|");
 
-    if(parts.length < 2){
+if(parts.length<2){
 
-        return "فرمت درست:\nیاد بگیر: سؤال | جواب";
+return "❌ فرمت درست:\nیاد بگیر: سؤال | جواب";
 
-    }
+}
 
-    const question =
-        clean(parts[0]);
+let question=
+clean(parts[0]);
 
-    const answer =
-        parts.slice(1).join("|").trim();
+let answer=
+parts.slice(1).join("|").trim();
 
-    if(!question || !answer)
-        return "❌ سؤال یا جواب خالی است.";
+if(!question || !answer)
+return "❌ سؤال یا جواب خالی است.";
 
-    learned[question] =
-        answer;
+learned[question]=answer;
 
-    saveLearned();
+localStorage.setItem(
+"MY_AI_MEMORY",
+JSON.stringify(learned)
+);
 
-    return "✅ یاد گرفتم!\n\n" +
-           "سؤال: " + question +
-           "\nجواب: " + answer;
+return "✅ یاد گرفتم!\n\n"+answer;
 
 }
 
 
-/* =====================================
-   🔎 پیدا کردن پاسخ
-===================================== */
+/* =========================
+   🔎 پیدا کردن جواب
+========================= */
 
 function findAnswer(text){
 
-    const q =
-        clean(text);
+let q=clean(text);
 
 
-    /* یادگیری شخصی */
+/* حافظه شخصی */
 
-    if(learned[q])
-        return learned[q];
-
-
-    /* data.json */
-
-    if(brain[q])
-        return brain[q];
+if(learned[q])
+return learned[q];
 
 
-    /* جستجوی ساده داخل کلیدها */
+/* مغز اصلی */
 
-    const keys =
-        Object.keys(learned);
-
-    for(const key of keys){
-
-        if(
-            q.includes(key) ||
-            key.includes(q)
-        ){
-
-            return learned[key];
-
-        }
-
-    }
+if(brain[q])
+return brain[q];
 
 
-    const brainKeys =
-        Object.keys(brain);
+/* جستجوی تقریبی در حافظه */
 
-    for(const key of brainKeys){
+for(const key in learned){
 
-        if(
-            q.includes(key) ||
-            key.includes(q)
-        ){
+if(
+q.includes(key) ||
+key.includes(q)
+){
 
-            return brain[key];
+return learned[key];
 
-        }
-
-    }
-
-
-    return null;
+}
 
 }
 
 
-/* =====================================
+/* جستجوی تقریبی در مغز */
+
+for(const key in brain){
+
+if(
+q.includes(key) ||
+key.includes(q)
+){
+
+return brain[key];
+
+}
+
+}
+
+return null;
+
+}
+
+
+/* =========================
    🧮 ماشین حساب
-===================================== */
+========================= */
 
 function calculator(text){
 
-    let x =
-        text
-        .replace("حساب کن","")
-        .replace("محاسبه کن","")
-        .trim();
+let x=
+text
+.replace("حساب کن","")
+.replace("محاسبه کن","")
+.trim();
 
-    if(
-        !/^[0-9+\-*/().%\s]+$/.test(x)
-    )
-        return null;
+if(
+!/^[0-9+\-*/().%\s]+$/.test(x)
+)
+return null;
 
-    try{
+try{
 
-        const result =
-            Function(
-                '"use strict";return (' +
-                x +
-                ')'
-            )();
+let result=
+Function(
+'"use strict";return ('+
+x+
+')'
+)();
 
-        if(Number.isFinite(result))
-            return "🧮 جواب: " + result;
+if(Number.isFinite(result))
+return "🧮 جواب: "+result;
 
-    }catch{}
+}catch(e){}
 
-    return null;
+return null;
 
 }
 
 
-/* =====================================
-   🤖 پاسخ AI
-===================================== */
+/* =========================
+   🤖 پاسخ
+========================= */
 
 function answer(text){
 
-    const q =
-        clean(text);
+let q=clean(text);
 
 
-    /* راهنما */
+/* آموزش */
 
-    if(q === "/help")
-        return `
-🤖 My AI
+if(
+text.trim().startsWith("یاد بگیر:")
+){
 
-یاد دادن:
+return teach(text);
+
+}
+
+
+/* راهنما */
+
+if(q==="/help"){
+
+return `
+🤖 راهنمای My AI
+
+🎤 میکروفن
+🔊 خواندن جواب
+🖼️ ارسال عکس
+🧠 حافظه
+🧮 ماشین حساب
+
+آموزش:
+
 یاد بگیر: سؤال | جواب
 
 مثال:
-یاد بگیر: پایتون چیست؟ | پایتون یک زبان برنامه‌نویسی است.
 
-دستورات:
+یاد بگیر: پایتخت ایران چیست؟ | تهران
+
+دستورها:
 
 /memory
-تعداد اطلاعات
-
 /clear
-پاک کردن یادگیری شخصی
-
 /help
-راهنما
 `;
-
-
-    /* حافظه */
-
-    if(q === "/memory"){
-
-        return (
-            "🧠 اطلاعات data.json: " +
-            Object.keys(brain).length.toLocaleString() +
-            "\n\n" +
-            "📚 چیزهایی که خودت یاد دادی: " +
-            Object.keys(learned).length.toLocaleString()
-        );
-
-    }
-
-
-    /* پاک کردن */
-
-    if(q === "/clear"){
-
-        clearLearned(false);
-
-        return "🗑️ یادگیری‌های شخصی پاک شدند.";
-
-    }
-
-
-    /* آموزش */
-
-    if(
-        text.trim().startsWith("یاد بگیر:")
-    ){
-
-        return teach(text);
-
-    }
-
-
-    /* ماشین حساب */
-
-    const math =
-        calculator(text);
-
-    if(math)
-        return math;
-
-
-    /* پاسخ */
-
-    const result =
-        findAnswer(text);
-
-    if(result)
-        return result;
-
-
-    return (
-        "🤔 جواب این سؤال را در اطلاعاتم پیدا نکردم.\n\n" +
-        "می‌توانی به من یاد بدهی:\n" +
-        "یاد بگیر: " +
-        text +
-        " | جواب"
-    );
 
 }
 
 
-/* =====================================
+/* حافظه */
+
+if(q==="/memory"){
+
+return(
+"🧠 مغز اصلی: "+
+Object.keys(brain).length+
+" اطلاعات\n"+
+"📚 حافظه شخصی: "+
+Object.keys(learned).length+
+" اطلاعات"
+);
+
+}
+
+
+/* پاک کردن یادگیری */
+
+if(q==="/clear"){
+
+learned={};
+
+localStorage.removeItem("MY_AI_MEMORY");
+
+return "🗑️ حافظه شخصی پاک شد.";
+
+}
+
+
+/* ماشین حساب */
+
+let math=
+calculator(text);
+
+if(math)
+return math;
+
+
+/* جواب */
+
+let result=
+findAnswer(text);
+
+if(result)
+return result;
+
+
+/* جواب پیدا نشد */
+
+return(
+"🤔 جواب این سؤال را هنوز ندارم.\n\n"+
+"می‌توانی به من یاد بدهی:\n"+
+"یاد بگیر: "+
+text+
+" | جواب"
+);
+
+}
+
+
+/* =========================
    📤 ارسال
-===================================== */
+========================= */
 
 function send(){
 
-    const input =
-        document.getElementById("input");
+let input=
+document.getElementById("input");
 
-    const text =
-        input.value.trim();
+let text=
+input.value.trim();
 
-    if(!text)
-        return;
+if(!text)
+return;
 
-    addUser(text);
+addMessage(text,"user");
 
-    input.value = "";
+history.push({
+text:text,
+type:"user"
+});
 
-    setTimeout(()=>{
+saveChat();
 
-        addAI(
-            answer(text)
-        );
+input.value="";
 
-    },150);
+setTimeout(()=>{
+
+let result=
+answer(text);
+
+lastAnswer=result;
+
+addMessage(result,"ai");
+
+history.push({
+text:result,
+type:"ai"
+});
+
+saveChat();
+
+},200);
 
 }
 
 
-/* =====================================
+/* =========================
    ⌨️ Enter
-===================================== */
+========================= */
 
 document
 .getElementById("input")
 .addEventListener(
-    "keydown",
-    e=>{
+"keydown",
+function(e){
 
-        if(e.key === "Enter")
-            send();
+if(e.key==="Enter")
+send();
 
-    }
+});
+
+
+/* =========================
+   🎤 میکروفن
+========================= */
+
+function startMic(){
+
+const SpeechRecognition=
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+if(!SpeechRecognition){
+
+alert(
+"❌ مرورگر شما تشخیص صدا را پشتیبانی نمی‌کند."
 );
 
+return;
 
-/* =====================================
+}
+
+const recognition=
+new SpeechRecognition();
+
+recognition.lang="fa-IR";
+
+recognition.continuous=false;
+
+recognition.interimResults=false;
+
+recognition.start();
+
+recognition.onresult=function(event){
+
+const text=
+event.results[0][0].transcript;
+
+document.getElementById("input").value=text;
+
+};
+
+}
+
+
+/* =========================
+   🔊 صدا
+========================= */
+
+function speakLast(){
+
+if(!lastAnswer){
+
+alert("هنوز جوابی ندارم.");
+
+return;
+
+}
+
+speechSynthesis.cancel();
+
+const speech=
+new SpeechSynthesisUtterance(
+lastAnswer
+);
+
+speech.lang="fa-IR";
+
+speech.rate=1;
+
+speechSynthesis.speak(speech);
+
+}
+
+
+/* =========================
    🧠 حافظه
-===================================== */
+========================= */
 
 function showMemory(){
 
-    addAI(
-        "🧠 اطلاعات اصلی: " +
-        Object.keys(brain).length.toLocaleString() +
-        "\n📚 یادگیری شخصی: " +
-        Object.keys(learned).length.toLocaleString()
-    );
+addMessage(
+"🧠 مغز اصلی: "+
+Object.keys(brain).length+
+"\n📚 حافظه شخصی: "+
+Object.keys(learned).length,
+"ai"
+);
 
 }
 
 
-/* =====================================
+/* =========================
    ❓ راهنما
-===================================== */
+========================= */
 
 function showHelp(){
 
-    addAI(answer("/help"));
+addMessage(
+answer("/help"),
+"ai"
+);
 
 }
 
 
-/* =====================================
-   🗑️ پاک کردن یادگیری
-===================================== */
+/* =========================
+   🗑️ پاک کردن چت
+========================= */
 
-function clearLearned(confirmBox=true){
+function clearChat(){
 
-    if(
-        confirmBox &&
-        !confirm("یادگیری‌های شخصی پاک شوند؟")
-    )
-        return;
+if(!confirm("کل چت پاک شود؟"))
+return;
 
-    learned = {};
+history=[];
 
-    saveLearned();
+localStorage.removeItem("MY_AI_CHAT");
 
-    addAI(
-        "🗑️ یادگیری‌های شخصی پاک شدند."
-    );
+document.getElementById("chat").innerHTML="";
+
+addMessage(
+"🧹 چت پاک شد.",
+"ai"
+);
 
 }
 
 
-/* =====================================
+/* =========================
    🖼️ عکس
-===================================== */
+========================= */
 
 function pickImage(){
 
-    document
-        .getElementById("file")
-        .click();
+document
+.getElementById("file")
+.click();
 
 }
 
@@ -669,64 +773,58 @@ function pickImage(){
 document
 .getElementById("file")
 .addEventListener(
-    "change",
-    function(){
+"change",
+function(){
 
-        const file =
-            this.files[0];
+const file=this.files[0];
 
-        if(!file)
-            return;
+if(!file)
+return;
 
-        const reader =
-            new FileReader();
+const reader=
+new FileReader();
 
-        reader.onload =
-            function(e){
+reader.onload=function(e){
 
-                const div =
-                    document.createElement("div");
+const div=
+document.createElement("div");
 
-                div.className =
-                    "msg user";
+div.className="msg user";
 
-                const img =
-                    document.createElement("img");
+const img=
+document.createElement("img");
 
-                img.src =
-                    e.target.result;
+img.src=e.target.result;
 
-                img.className =
-                    "chat-img";
+img.className="image";
 
-                div.appendChild(img);
+div.appendChild(img);
 
-                document
-                    .getElementById("chat")
-                    .appendChild(div);
+document
+.getElementById("chat")
+.appendChild(div);
 
-                scrollChat();
+scrollChat();
 
-                addAI(
-                    "🖼️ عکس دریافت شد!"
-                );
-
-            };
-
-        reader.readAsDataURL(file);
-
-    }
+addMessage(
+"🖼️ عکس دریافت شد.",
+"ai"
 );
 
+};
 
-/* =====================================
+reader.readAsDataURL(file);
+
+});
+
+
+/* =========================
    🚀 شروع
-===================================== */
+========================= */
 
-loadLearned();
-
-addAI(
-    "سلام 👋\nمن My AI هستم.\nدارم اطلاعاتم را بارگذاری می‌کنم..."
+addMessage(
+"🤖 سلام!\nدر حال بارگذاری مغز...",
+"ai"
 );
 
 loadBrain();
@@ -734,4 +832,4 @@ loadBrain();
 </script>
 
 </body>
-</html>
+</html> 
